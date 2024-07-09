@@ -1,8 +1,12 @@
 package ru.practicum.shareit.user.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.practicum.shareit.user.dto.UserDto;
 
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -12,12 +16,16 @@ import javax.validation.constraints.Pattern;
  */
 @Data
 @Builder
+@Entity
+@Table(name = "users")
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
-    private long id;
-    @NotBlank
-    @Pattern(regexp = "\\S+")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false)
     private String name;
-    @Email(message = "Field: Email must have the format EMAIL!")
-    @NotBlank(message = "Field: Email must be filled!")
+    @Column(nullable = false, unique = true)
     private String email;
 }
