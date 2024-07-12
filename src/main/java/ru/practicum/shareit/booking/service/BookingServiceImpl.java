@@ -52,7 +52,7 @@ public class BookingServiceImpl implements BookingService {
             throw new AccessException(String.format("Item with id = %d not have owner.", itemId));
         }
         if (owner.getId().equals(userId)) {
-            throw new AccessException(String.format("Booker cannot be owner of item id: %d", userId));
+            throw new NotFoundException(String.format("Booker cannot be owner of item id: %d", userId));
         }
         LocalDateTime start = bookingDto.getStart();
         LocalDateTime end = bookingDto.getEnd();
