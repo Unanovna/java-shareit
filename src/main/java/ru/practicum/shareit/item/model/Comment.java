@@ -47,6 +47,7 @@ public class Comment {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
+    @Column
     private LocalDateTime created = LocalDateTime.now();
 
     @Override

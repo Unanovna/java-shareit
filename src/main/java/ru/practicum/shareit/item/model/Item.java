@@ -9,6 +9,7 @@ import lombok.ToString;
 import org.hibernate.proxy.HibernateProxy;
 import ru.practicum.shareit.user.model.User;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -36,12 +37,15 @@ public class Item {
     private Long id;
 
     @NotBlank
+    @Column
     private String name;
 
     @NotBlank
+    @Column
     private String description;
 
     @NotNull
+    @Column
     private Boolean available;
 
     @NotNull
