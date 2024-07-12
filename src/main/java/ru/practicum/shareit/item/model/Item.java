@@ -54,7 +54,7 @@ public class Item {
     @JoinColumn(name = "owner_id")
     private User owner;
 
-    private Long request;
+    private Long requestId;
 
     @Override
     public final boolean equals(Object o) {
