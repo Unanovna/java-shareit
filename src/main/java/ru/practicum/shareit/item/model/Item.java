@@ -45,7 +45,7 @@ public class Item {
     private String description;
 
     @NotNull
-    @Column(name = "available")
+    @Column(name = "is_available")
     private boolean available;
 
     @NotNull
