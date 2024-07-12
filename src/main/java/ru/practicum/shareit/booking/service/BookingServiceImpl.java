@@ -59,7 +59,7 @@ public class BookingServiceImpl implements BookingService {
         if (end.isBefore(start) || end.equals(start)) {
             throw new ValidationException(String.format("Wrong booking time start = %s and end = %s", start, end));
         }
-        if (!item.getAvailable()) {
+        if (!item.isAvailable()) {
             throw new ValidationException(String.format("Item with id: %d is not available!", userId));
         }
         Booking booking = Booking.builder()
