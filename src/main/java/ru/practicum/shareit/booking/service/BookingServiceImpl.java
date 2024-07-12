@@ -110,15 +110,13 @@ public class BookingServiceImpl implements BookingService {
         if (owner == null) {
             throw new InternalServerError(String.format("For booking with id: %s Owner is not installed!", booker.getId()));
         }
-        Long ownerId = owner.getId();
-        if (ownerId.equals(userId)) {
-            return;
+        if (!owner.getId().equals(userId)) {
+            throw new NotFoundException("wrong owner");
         }
-        if (accessForBooker && bookerId.equals(userId)) {
-            return;
+        if (!accessForBooker && !bookerId.equals(userId)) {
+            throw new AccessException(String.format("Access to User id:%s for booking id:%s is denied",
+                    userId, booking.getId()));
         }
-        throw new AccessException(String.format("Access to User id:%s for booking id:%s is denied",
-                userId, booking.getId()));
     }
 
     @Override
