@@ -45,8 +45,8 @@ public class Item {
     private String description;
 
     @NotNull
-    @Column
-    private Boolean available;
+    @Column(name = "available")
+    private boolean available;
 
     @NotNull
     @ToString.Exclude
