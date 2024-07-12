@@ -75,7 +75,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public OutputBookingDto approveBooking(Long bookingId, Long userId, Boolean approve) {
-        Booking booking = getBookingById(bookingId, userId);
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException(String.format("Booking with id: %d not found", bookingId)));
         if (booking.getStatus().equals(BookingStatus.APPROVED)) {
             throw new ValidationException(String.format("Booking with id: %d already have status %s",
                     bookingId, BookingStatus.APPROVED));
