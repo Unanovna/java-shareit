@@ -121,12 +121,8 @@ public class BookingServiceImpl implements BookingService {
                 return;
             }
         }
-        if (bookerId.equals(userId)) {
-            throw new NotFoundException("wrong owner");
-        } else {
-            throw new AccessException(String.format("Access to User id:%s for booking id:%s is denied",
-                    userId, booking.getId()));
-        }
+        throw new NotFoundException(String.format("Access to User id:%s for booking id:%s is denied",
+                userId, booking.getId()));
     }
 
     @Override
