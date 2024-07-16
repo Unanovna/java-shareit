@@ -1,12 +1,23 @@
 package ru.practicum.shareit.request.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
+import lombok.Data;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.item.dto.ItemDto;
 
-/**
- * TODO Sprint add-item-requests.
- */
-@RestController
-@RequestMapping(path = "/requests")
+import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Builder
+@Data
 public class ItemRequestDto {
+    private Long id;
+    @NotBlank
+    private String description;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime created;
+    private List<ItemDto> items;
 }

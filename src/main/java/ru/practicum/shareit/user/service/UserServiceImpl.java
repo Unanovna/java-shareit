@@ -26,11 +26,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto update(User user) {
-        long id = user.getId();
-        getUserById(id);
+    public UserDto update(Long userId, User user) {
+        getUserById(userId);
         return UserMapper.toUserDto(userRepository.save(user));
     }
+
 
     @Transactional
     @Override
