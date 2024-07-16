@@ -1,21 +1,19 @@
 package ru.practicum.shareit.item.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.List;
 
-public interface ItemRepository {
-    Item add(Item item);
+public interface ItemRepository extends JpaRepository<Item, Long> {
+    List<Item> findAllByOwnerId(Long ownerId);
 
-    Item update(Item item);
+    @Query(value = "select i from Item i " +
+            "where lower(i.name) like lower(concat('%',?1,'%')) "
+            + " or lower(i.description) like lower(concat('%',?1,'%'))"
+            + " and i.available=true")
+    List<Item> searchAvailableItems(String text);
 
-    List<Item> getAll();
-
-    List<Item> getAllByOwner(long ownerId);
-
-    Item get(long id);
-
-    void delete(long userId);
-
-    void deleteAll();
+    void deleteById(long itemId);
 }

@@ -1,7 +1,9 @@
 package ru.practicum.shareit.item.service;
 
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+
 
 import java.util.List;
 import java.util.Map;
@@ -9,15 +11,21 @@ import java.util.Map;
 public interface ItemService {
     ItemDto add(long ownerId, Item item);
 
-    ItemDto update(long ownerId, long itemId, Map<String, String> updates);
+    ItemDto update(Long ownerId, Long itemId, Map<String, String> updates);
 
-    ItemDto get(long id);
+    Item getItemById(Long itemId);
 
-    List<ItemDto> getAll(long ownerId);
+    Long getOwnerId(Long itemId);
 
-    List<ItemDto> searchItems(String query);
+    ItemDto getItemDtoById(Long itemId, Long userId);
 
-    void delete(long ownerId, long itemId);
+    List<ItemDto> getAllUserItems(Long userId);
+
+    List<ItemDto> searchItems(Long userId, String query);
+
+    void delete(Long ownerId, Long itemId);
 
     void deleteAll();
+
+    CommentDto addComment(Long userId, Long itemId, CommentDto commentDto);
 }

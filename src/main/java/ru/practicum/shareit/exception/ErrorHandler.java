@@ -41,8 +41,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
-        String strError = String.format("Exception has occurred: %s", e.getMessage());
-        log.info(strError);
-        return new ErrorResponse(strError);
+        log.error(e.getMessage(), e);
+        return new ErrorResponse(e.getMessage());
     }
 }
