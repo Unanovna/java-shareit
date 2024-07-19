@@ -218,12 +218,12 @@ class BookingServiceImplTest {
     void getBookingsOfBookerOk() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         List<Booking> bookings = List.of(booking);
-        when(bookingRepository.findAllByBookerId(anyLong(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndEndBefore(anyLong(), any(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndStartAfter(anyLong(), any(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(anyLong(), any(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByBookerId(anyLong())).thenReturn(bookings);
+        when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByBookerIdAndEndBefore(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByBookerIdAndStartAfter(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(anyLong(), any())).thenReturn(bookings);
         Long bookerId = booking.getBooker().getId();
         assertEquals(1, bookingService.getBookingsOfBooker("ALL", bookerId, 0, 10).size());
         assertEquals(1, bookingService.getBookingsOfBooker("WAITING", bookerId, 0, 10).size());
@@ -245,11 +245,11 @@ class BookingServiceImplTest {
     void getBookingsOfOwnerIsOk() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         List<Booking> bookings = List.of(booking);
-        when(bookingRepository.findAllByOwnerIdAndStatus(anyLong(), any(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByOwnerIdAndEndBefore(anyLong(), any(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByOwnerIdAndStartAfter(anyLong(), any(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByOwnerIdAndStartBeforeAndEndAfter(anyLong(), any(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByOwnerId(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByOwnerIdAndStatus(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByOwnerIdAndEndBefore(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByOwnerIdAndStartAfter(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByOwnerIdAndStartBeforeAndEndAfter(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAllByOwnerId(anyLong())).thenReturn(bookings);
         Long ownerId = booking.getItem().getOwner().getId();
         assertEquals(1, bookingService.getBookingsOfOwner("ALL", ownerId, 0, 10).size());
         assertEquals(1, bookingService.getBookingsOfOwner("WAITING", ownerId, 0, 10).size());

@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.item.model.Item;
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
@@ -15,7 +14,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             "where( lower(i.name) like lower(concat('%',?1,'%')) "
             + " or lower(i.description) like lower(concat('%',?1,'%')))"
             + " and i.available=true")
-    List<Item> searchAvailableItems(String text, Pageable pageable);
+    List<Item> searchAvailableItems(String text);
 
     List<Item> findAllByRequestIdIn(List<Long> requestIds);
 

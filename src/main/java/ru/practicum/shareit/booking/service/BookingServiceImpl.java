@@ -136,23 +136,22 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings;
         switch (state) {
             case WAITING:
-                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, BookingStatus.WAITING, (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, BookingStatus.WAITING);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, BookingStatus.REJECTED, (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, BookingStatus.REJECTED);
                 break;
             case PAST:
-                bookings = bookingRepository.findAllByBookerIdAndEndBefore(bookerId, LocalDateTime.now(), (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByBookerIdAndEndBefore(bookerId, LocalDateTime.now());
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllByBookerIdAndStartAfter(bookerId, LocalDateTime.now(), (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByBookerIdAndStartAfter(bookerId, LocalDateTime.now());
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(bookerId, LocalDateTime.now(),
-                        (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(bookerId, LocalDateTime.now());
                 break;
             default:
-                bookings = bookingRepository.findAllByBookerId(bookerId, (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByBookerId(bookerId);
         }
         return BookingMapper.toOutputsBookingDtoList(bookings);
     }
@@ -166,23 +165,22 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings;
         switch (state) {
             case WAITING:
-                bookings = bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.WAITING, (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.WAITING);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.REJECTED, (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.REJECTED);
                 break;
             case PAST:
-                bookings = bookingRepository.findAllByOwnerIdAndEndBefore(ownerId, LocalDateTime.now(), (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByOwnerIdAndEndBefore(ownerId, LocalDateTime.now());
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllByOwnerIdAndStartAfter(ownerId, LocalDateTime.now(), (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByOwnerIdAndStartAfter(ownerId, LocalDateTime.now());
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllByOwnerIdAndStartBeforeAndEndAfter(ownerId, LocalDateTime.now(),
-                        (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByOwnerIdAndStartBeforeAndEndAfter(ownerId, LocalDateTime.now());
                 break;
             default:
-                bookings = bookingRepository.findAllByOwnerId(ownerId, (java.awt.print.Pageable) pageable);
+                bookings = bookingRepository.findAllByOwnerId(ownerId);
         }
         return BookingMapper.toOutputsBookingDtoList(bookings);
     }

@@ -120,8 +120,7 @@ public class ItemServiceImpl implements ItemService {
         ItemDto itemDto = ItemMapper.toItemDto(item);
         if (item.getOwner() != null && item.getOwner().getId().equals(userId)) {
             setBookings(itemDto,
-                    bookingRepository.findAllByItemIdAndStatus((Long) itemId, BookingStatus.APPROVED,
-                            (java.awt.print.Pageable) PageRequest.of(0, 10000, BookingRepository.SORT_BY_START_BY_DESC)));
+                    bookingRepository.findAllByItemIdAndStatus(itemId, BookingStatus.APPROVED));
         }
         setComments(itemDto, comments);
         return itemDto;
@@ -133,7 +132,7 @@ public class ItemServiceImpl implements ItemService {
         getUserById(userId);
         List<Item> items = itemRepository.findAllByOwnerId(userId, PageRequest.of(from / size, size));
         Pageable pageable = PageRequest.of(from / size, size, BookingRepository.SORT_BY_START_BY_DESC);
-        List<Booking> bookings = bookingRepository.findAllByOwnerIdAndStatus(userId, BookingStatus.APPROVED, (java.awt.print.Pageable) pageable);
+        List<Booking> bookings = bookingRepository.findAllByOwnerIdAndStatus(userId, BookingStatus.APPROVED);
         List<Comment> comments = commentRepository.findAllByItemIdIn(items.stream()
                 .map(Item::getId)
                 .collect(Collectors.toList()), sort);
@@ -190,7 +189,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> searchItems(String query, int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
-        return ItemMapper.toItemDtoList(itemRepository.searchAvailableItems(query, (java.awt.print.Pageable) pageable));
+        return ItemMapper.toItemDtoList(itemRepository.searchAvailableItems(query));
     }
 
     @Transactional

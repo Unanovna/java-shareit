@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
@@ -35,6 +36,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto patchUpdate(long id, Map<String, String> updates) {
+        if (!updates.containsKey("name") && !updates.containsKey("email")) {
+            throw new ValidationException("Не найдено полей для обновления");
+        }
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("User with id %d not found", id)));
         if (updates.containsKey("name")) {

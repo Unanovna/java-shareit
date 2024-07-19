@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repositories.BookingRepository;
@@ -31,11 +30,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ItemServiceImplTest {
@@ -198,17 +204,17 @@ class ItemServiceImplTest {
     void searchAvailableItemsWithEmptyRequest() {
         List<ItemDto> items = itemService.searchItems("", 0, 100);
         assertTrue(items.isEmpty());
-        verify(itemRepository).searchAvailableItems(anyString(), (java.awt.print.Pageable) any(Pageable.class));
+        verify(itemRepository).searchAvailableItems(anyString());
     }
 
     @Test
     void searchAvailableItemsWithReturnCollection() {
-        when(itemRepository.searchAvailableItems(anyString(), (java.awt.print.Pageable) any(Pageable.class))).thenReturn(List.of(item));
+        when(itemRepository.searchAvailableItems(anyString())).thenReturn(List.of(item));
         List<ItemDto> items = itemService.searchItems("quEry", 0, 100);
         assertFalse(items.isEmpty());
         assertEquals(1, items.size());
         assertEquals(items.get(0), ItemMapper.toItemDto(item));
-        verify(itemRepository).searchAvailableItems(anyString(), (java.awt.print.Pageable) any(Pageable.class));
+        verify(itemRepository).searchAvailableItems(anyString());
     }
 
     @Test
@@ -287,7 +293,7 @@ class ItemServiceImplTest {
         ItemDto outItemDto = itemService.getItemDtoById(item.getId(), user.getId());
         assertEquals(outItemDto.getName(), item.getName());
         assertEquals(1, outItemDto.getComments().size());
-        verify(bookingRepository).findAllByItemIdAndStatus(anyLong(), any(), any());
+        verify(bookingRepository).findAllByItemIdAndStatus(anyLong(), any());
     }
 
     @Test
@@ -297,7 +303,7 @@ class ItemServiceImplTest {
         item.setOwner(user);
         ItemDto outItemDto = itemService.getItemDtoById(item.getId(), user2.getId());
         assertEquals(outItemDto.getName(), item.getName());
-        verify(bookingRepository, never()).findAllByItemIdAndStatus(anyLong(), any(), any());
+        verify(bookingRepository, never()).findAllByItemIdAndStatus(anyLong(), any());
     }
 
 }

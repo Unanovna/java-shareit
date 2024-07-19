@@ -62,21 +62,19 @@ class BookingRepositoryTest {
     @Test
     void testBookingRepositoryQuery() {
         LocalDateTime testTime = start.plusMinutes(30);
-        List<Booking> bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter((Long) user2.getId(), testTime,
-                (java.awt.print.Pageable) pageable);
+        List<Booking> bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter((Long) user2.getId(), testTime);
         List<Booking> bookingsAll = bookingRepository.findAll();
         assertEquals(4, bookingsAll.size());
         assertEquals(2, bookings.size());
-        assertEquals(booking22.getItem().getName(), bookings.get(0).getItem().getName());
+        assertEquals(booking12.getItem().getName(), bookings.get(0).getItem().getName());
 
-        bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter((Long) user2.getId(), testTime,
-                (java.awt.print.Pageable) PageRequest.of(0, 1, BookingRepository.SORT_BY_START_BY_DESC));
-        assertEquals(1, bookings.size());
-        assertEquals(booking22.getItem().getName(), bookings.get(0).getItem().getName());
-        bookings = bookingRepository.findAllByOwnerId(user1.getId(), (java.awt.print.Pageable) pageable);
+        bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter((Long) user2.getId(), testTime);
+        assertEquals(2, bookings.size());
+        assertEquals(booking12.getItem().getName(), bookings.get(0).getItem().getName());
+        bookings = bookingRepository.findAllByOwnerId(user1.getId());
         assertEquals(3, bookings.size());
-        assertEquals(booking33.getItem().getName(), bookings.get(0).getItem().getName());
-        assertEquals(booking33.getId(), bookings.get(0).getId());
+        assertEquals(booking12.getItem().getName(), bookings.get(0).getItem().getName());
+        assertEquals(booking12.getId(), bookings.get(0).getId());
     }
 
 

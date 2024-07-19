@@ -8,7 +8,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +35,7 @@ class ItemRepositoryTest {
         itemRepository.saveAll(List.of(item1, item2, item3, item4, item5));
         PageRequest page = PageRequest.of(0, 10);
         List<Item> itemAll = itemRepository.findAll();
-        List<Item> items = itemRepository.searchAvailableItems("iTem", (Pageable) page);
+        List<Item> items = itemRepository.searchAvailableItems("iTem");
         assertEquals(5, itemAll.size());
         assertEquals(3, items.size());
         assertEquals(item3.getDescription(), items.get(1).getDescription());
