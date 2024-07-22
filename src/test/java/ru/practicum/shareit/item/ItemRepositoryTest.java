@@ -35,7 +35,7 @@ class ItemRepositoryTest {
         itemRepository.saveAll(List.of(item1, item2, item3, item4, item5));
         PageRequest page = PageRequest.of(0, 10);
         List<Item> itemAll = itemRepository.findAll();
-        List<Item> items = itemRepository.searchAvailableItems("iTem");
+        List<Item> items = itemRepository.searchAvailableItems("iTem", page).getContent();
         assertEquals(5, itemAll.size());
         assertEquals(3, items.size());
         assertEquals(item3.getDescription(), items.get(1).getDescription());

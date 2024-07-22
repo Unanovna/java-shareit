@@ -6,6 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import ru.practicum.shareit.booking.dto.InputBookingDto;
 import ru.practicum.shareit.booking.dto.OutputBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -20,15 +23,19 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.PageUtil;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -217,20 +224,22 @@ class BookingServiceImplTest {
     @Test
     void getBookingsOfBookerOk() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        List<Booking> bookings = List.of(booking);
-        when(bookingRepository.findAllByBookerId(anyLong())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndStatus(anyLong(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndEndBefore(anyLong(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndStartAfter(anyLong(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(anyLong(), any())).thenReturn(bookings);
+        when(bookingRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(
+                new PageImpl<>(List.of(booking), PageUtil.getPageRequest(0, 10), 1)
+        );
         Long bookerId = booking.getBooker().getId();
-        assertEquals(1, bookingService.getBookingsOfBooker("ALL", bookerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfBooker("WAITING", bookerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfBooker("REJECTED", bookerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfBooker("CURRENT", bookerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfBooker("PAST", bookerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfBooker("FUTURE", bookerId, 0, 10).size());
+        assertEquals(1, bookingService.getBookingsOfBooker("ALL", bookerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfBooker("WAITING", bookerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfBooker("REJECTED", bookerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfBooker("CURRENT", bookerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfBooker("PAST", bookerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfBooker("FUTURE", bookerId, 0, 10)
+                .getTotalElements());
     }
 
     @Test
@@ -244,19 +253,22 @@ class BookingServiceImplTest {
     @Test
     void getBookingsOfOwnerIsOk() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        List<Booking> bookings = List.of(booking);
-        when(bookingRepository.findAllByOwnerIdAndStatus(anyLong(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByOwnerIdAndEndBefore(anyLong(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByOwnerIdAndStartAfter(anyLong(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByOwnerIdAndStartBeforeAndEndAfter(anyLong(), any())).thenReturn(bookings);
-        when(bookingRepository.findAllByOwnerId(anyLong())).thenReturn(bookings);
+        when(bookingRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(
+                new PageImpl<>(List.of(booking), PageUtil.getPageRequest(0, 10), 1)
+        );
         Long ownerId = booking.getItem().getOwner().getId();
-        assertEquals(1, bookingService.getBookingsOfOwner("ALL", ownerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfOwner("WAITING", ownerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfOwner("REJECTED", ownerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfOwner("CURRENT", ownerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfOwner("PAST", ownerId, 0, 10).size());
-        assertEquals(1, bookingService.getBookingsOfOwner("FUTURE", ownerId, 0, 10).size());
+        assertEquals(1, bookingService.getBookingsOfOwner("ALL", ownerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfOwner("WAITING", ownerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfOwner("REJECTED", ownerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfOwner("CURRENT", ownerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfOwner("PAST", ownerId, 0, 10)
+                .getTotalElements());
+        assertEquals(1, bookingService.getBookingsOfOwner("FUTURE", ownerId, 0, 10)
+                .getTotalElements());
     }
 
     @Test

@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.repositories;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,16 +14,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BookingRepository extends JpaRepository<Booking, Long> {
+public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpecificationExecutor<Booking> {
     Sort SORT_BY_START_BY_DESC = Sort.by(Sort.Direction.DESC, "start");
-
-    List<Booking> findAllByBookerId(long bookerId);
-
-    List<Booking> findAllByBookerIdAndStatus(long bookerId, BookingStatus status);
-
-    List<Booking> findAllByBookerIdAndStartAfter(long bookerId, LocalDateTime start);
-
-    List<Booking> findAllByBookerIdAndEndBefore(long bookerId, LocalDateTime end);
 
     @Query(value = "select b from Booking b where b.booker.id = ?1 and b.start < ?2 and b.end > ?2")
     List<Booking> findAllByBookerIdAndStartBeforeAndEndAfter(long bookerId, LocalDateTime dateTime);

@@ -2,7 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.PageUtil;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -128,20 +130,20 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public List<ItemDto> getAllUserItems(Long userId, int from, int size) {
+    public Page<ItemDto> getAllUserItems(Long userId, int from, int size) {
         getUserById(userId);
-        List<Item> items = itemRepository.findAllByOwnerId(userId, PageRequest.of(from / size, size));
-        Pageable pageable = PageRequest.of(from / size, size, BookingRepository.SORT_BY_START_BY_DESC);
+        Pageable pageRequest = PageUtil.getPageRequest(from, size);
+        Page<Item> items = itemRepository.findAllByOwnerId(userId, pageRequest);
         List<Booking> bookings = bookingRepository.findAllByOwnerIdAndStatus(userId, BookingStatus.APPROVED);
-        List<Comment> comments = commentRepository.findAllByItemIdIn(items.stream()
+        List<Comment> comments = commentRepository.findAllByItemIdIn(items.getContent().stream()
                 .map(Item::getId)
                 .collect(Collectors.toList()), sort);
-        List<ItemDto> itemsDto = ItemMapper.toItemDtoList(items);
+        List<ItemDto> itemsDto = ItemMapper.toItemDtoList(items.getContent());
         itemsDto.forEach(i -> {
             setBookings(i, bookings);
             setComments(i, comments);
         });
-        return itemsDto;
+        return new PageImpl<>(itemsDto, pageRequest, items.getTotalElements());
     }
 
     private void setBookings(ItemDto itemDto, List<Booking> bookings) {
@@ -187,9 +189,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> searchItems(String query, int from, int size) {
-        Pageable pageable = PageRequest.of(from / size, size);
-        return ItemMapper.toItemDtoList(itemRepository.searchAvailableItems(query));
+    public Page<ItemDto> searchItems(String query, int from, int size) {
+        Pageable pageRequest = PageUtil.getPageRequest(from, size);
+        Page<Item> items = itemRepository.searchAvailableItems(query, pageRequest);
+        return new PageImpl<>(ItemMapper.toItemDtoList(items.getContent()), pageRequest, items.getTotalElements());
     }
 
     @Transactional

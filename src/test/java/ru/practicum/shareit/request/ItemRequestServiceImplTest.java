@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -16,6 +17,7 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.PageUtil;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -72,7 +74,7 @@ class ItemRequestServiceImplTest {
     void addWithNotFoundUser() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> itemRequestService.add(inputItemRequestDto, user.getId()));
-        verify(itemRequestRepository,never()).save(any(ItemRequest.class));
+        verify(itemRequestRepository, never()).save(any(ItemRequest.class));
     }
 
     @Test
@@ -92,9 +94,11 @@ class ItemRequestServiceImplTest {
     @Test
     void getOtherUserRequestsWithOk() {
         when(userRepository.existsUserById(anyLong())).thenReturn(true);
-        when(itemRequestRepository.findAllByRequesterIdNot(anyLong(), any())).thenReturn(List.of(itemRequest));
+        when(itemRequestRepository.findAllByRequesterIdNot(anyLong(), any())).thenReturn(
+                new PageImpl<>(List.of(itemRequest), PageUtil.getPageRequest(0, 1), 1));
         when(itemRepository.findAllByRequestIdIn(any())).thenReturn(List.of());
-        List<ItemRequestDto> actual = itemRequestService.getOtherUserRequests(user.getId(), 0, 1);
+        List<ItemRequestDto> actual = itemRequestService.getOtherUserRequests(user.getId(), 0, 1)
+                .getContent();
         assertFalse(actual.isEmpty());
         assertEquals(1, actual.size());
         assertEquals(itemRequest.getId(), actual.get(0).getId());

@@ -71,7 +71,7 @@ class ItemRequestRepositoryTest {
     @Test
     void findAllByRequesterIdNotIsOk() {
         PageRequest page = PageRequest.of(0, 10, sort);
-        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdNot(user1.getId(), page);
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdNot(user1.getId(), page).getContent();
         assertEquals(1, itemRequests.size());
         assertEquals(itemRequest3.getDescription(), itemRequests.get(0).getDescription());
         assertEquals(4, itemRequestRepository.findAll().size());

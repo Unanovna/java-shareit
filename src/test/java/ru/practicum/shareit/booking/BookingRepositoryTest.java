@@ -62,13 +62,13 @@ class BookingRepositoryTest {
     @Test
     void testBookingRepositoryQuery() {
         LocalDateTime testTime = start.plusMinutes(30);
-        List<Booking> bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter((Long) user2.getId(), testTime);
+        List<Booking> bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(user2.getId(), testTime);
         List<Booking> bookingsAll = bookingRepository.findAll();
         assertEquals(4, bookingsAll.size());
         assertEquals(2, bookings.size());
         assertEquals(booking12.getItem().getName(), bookings.get(0).getItem().getName());
 
-        bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter((Long) user2.getId(), testTime);
+        bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(user2.getId(), testTime);
         assertEquals(2, bookings.size());
         assertEquals(booking12.getItem().getName(), bookings.get(0).getItem().getName());
         bookings = bookingRepository.findAllByOwnerId(user1.getId());
@@ -76,6 +76,4 @@ class BookingRepositoryTest {
         assertEquals(booking12.getItem().getName(), bookings.get(0).getItem().getName());
         assertEquals(booking12.getId(), bookings.get(0).getId());
     }
-
-
 }

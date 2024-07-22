@@ -1,8 +1,9 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
@@ -19,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static ru.practicum.shareit.util.PageUtil.getPageRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -44,13 +47,17 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public List<ItemRequestDto> getUserRequests(Long userId, int from, int size) {
         existsUserById(userId);
         return itemRequestsToDto(itemRequestRepository.findAllByRequesterIdOrderByCreatedDesc(userId,
-                (org.springframework.data.domain.Pageable) getPageRequest(from, size)));
+                getPageRequest(from, size)));
     }
 
     @Override
-    public List<ItemRequestDto> getOtherUserRequests(Long userId, int from, int size) {
+    public Page<ItemRequestDto> getOtherUserRequests(Long userId, int from, int size) {
         existsUserById(userId);
-        return itemRequestsToDto(itemRequestRepository.findAllByRequesterIdNot(userId, getPageRequest(from, size)));
+        Pageable pageRequest = getPageRequest(from, size);
+        Page<ItemRequest> allByRequesterIdNot = itemRequestRepository
+                .findAllByRequesterIdNot(userId, pageRequest);
+        return new PageImpl<>(itemRequestsToDto(allByRequesterIdNot.getContent()), pageRequest,
+                allByRequesterIdNot.getTotalElements());
     }
 
     @Override
@@ -78,10 +85,6 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (!(userRepository.existsUserById(userId))) {
             throw new NotFoundException(String.format("User with id: %d not found", userId));
         }
-    }
-
-    private org.springframework.data.domain.Pageable getPageRequest(int from, int size) {
-        return (org.springframework.data.domain.Pageable) PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "created"));
     }
 
     private ItemRequest getItemRequestById(Long id) {

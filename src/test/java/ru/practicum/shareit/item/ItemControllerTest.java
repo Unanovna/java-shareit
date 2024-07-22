@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -16,21 +17,32 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.util.PageUtil;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.constant.HeaderConstant.USER_ID_IN_HEADER;
 
 @WebMvcTest(ItemController.class)
 class ItemControllerTest {
-    private static final String USER_ID_IN_HEADER = "X-Sharer-User-Id";
+
     @MockBean
     ItemService itemService;
     @Autowired
@@ -139,33 +151,37 @@ class ItemControllerTest {
 
     @Test
     void getAllUserItemsIsOk() throws Exception {
-        when(itemService.getAllUserItems(anyLong(), anyInt(), anyInt())).thenReturn(List.of(ItemMapper.toItemDto(item)));
+        when(itemService.getAllUserItems(anyLong(), anyInt(), anyInt())).thenReturn(
+                new PageImpl<>(List.of(ItemMapper.toItemDto(item)), PageUtil.getPageRequest(0, 10), 1)
+        );
         mvc.perform(get("/items")
                         .header(USER_ID_IN_HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[*]").exists())
-                .andExpect(jsonPath("$.[*]").isNotEmpty())
-                .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$.[0].id").value(item.getId()))
-                .andExpect(jsonPath("$.[0].description").value(item.getDescription()))
-                .andExpect(jsonPath("$.[0].available").value(item.getAvailable()))
-                .andExpect(jsonPath("$.[0].name").value(item.getName()))
-                .andExpect(jsonPath("$.[0].requestId").isEmpty())
-                .andExpect(jsonPath("$.[0].lastBooking").isEmpty())
-                .andExpect(jsonPath("$.[0].nextBooking").isEmpty())
-                .andExpect(jsonPath("$.[0].comments").isEmpty());
+                .andExpect(jsonPath("$.content.[*]").exists())
+                .andExpect(jsonPath("$.content.[*]").isNotEmpty())
+                .andExpect(jsonPath("$.content.size()").value(1))
+                .andExpect(jsonPath("$.content.[0].id").value(item.getId()))
+                .andExpect(jsonPath("$.content.[0].description").value(item.getDescription()))
+                .andExpect(jsonPath("$.content.[0].available").value(item.getAvailable()))
+                .andExpect(jsonPath("$.content.[0].name").value(item.getName()))
+                .andExpect(jsonPath("$.content.[0].requestId").isEmpty())
+                .andExpect(jsonPath("$.content.[0].lastBooking").isEmpty())
+                .andExpect(jsonPath("$.content.[0].nextBooking").isEmpty())
+                .andExpect(jsonPath("$.content.[0].comments").isEmpty());
         verify(itemService).getAllUserItems(anyLong(), anyInt(), anyInt());
     }
 
     @Test
     void getAllUserItemsWithoutItem() throws Exception {
-        when(itemService.getAllUserItems(anyLong(), anyInt(), anyInt())).thenReturn(List.of());
+        when(itemService.getAllUserItems(anyLong(), anyInt(), anyInt())).thenReturn(
+                new PageImpl<>(Collections.emptyList(), PageUtil.getPageRequest(0, 10), 0)
+        );
         mvc.perform(get("/items")
                         .header(USER_ID_IN_HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[*]").isEmpty());
+                .andExpect(jsonPath("$.content.[*]").isEmpty());
         verify(itemService).getAllUserItems(anyLong(), anyInt(), anyInt());
     }
 
@@ -191,7 +207,9 @@ class ItemControllerTest {
 
     @Test
     void searchItemsWithOkRequest() throws Exception {
-        when(itemService.searchItems(anyString(), anyInt(), anyInt())).thenReturn(List.of(itemDto));
+        when(itemService.searchItems(anyString(), anyInt(), anyInt())).thenReturn(
+                new PageImpl<>(List.of(itemDto), PageUtil.getPageRequest(0, 10), 1)
+        );
         mvc.perform(get("/items/search")
                         .header(USER_ID_IN_HEADER, 1L)
                         .param("text", "caPch")
@@ -199,17 +217,17 @@ class ItemControllerTest {
                         .param("size", "10")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[*]").exists())
-                .andExpect(jsonPath("$.[*]").isNotEmpty())
-                .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$.[0].id").value(itemDto.getId()))
-                .andExpect(jsonPath("$.[0].description").value(itemDto.getDescription()))
-                .andExpect(jsonPath("$.[0].available").value(itemDto.getAvailable()))
-                .andExpect(jsonPath("$.[0].name").value(itemDto.getName()))
-                .andExpect(jsonPath("$.[0].requestId").isEmpty())
-                .andExpect(jsonPath("$.[0].lastBooking").isEmpty())
-                .andExpect(jsonPath("$.[0].nextBooking").isEmpty())
-                .andExpect(jsonPath("$.[0].comments").isEmpty());
+                .andExpect(jsonPath("$.content.[*]").exists())
+                .andExpect(jsonPath("$.content.[*]").isNotEmpty())
+                .andExpect(jsonPath("$.content.size()").value(1))
+                .andExpect(jsonPath("$.content.[0].id").value(itemDto.getId()))
+                .andExpect(jsonPath("$.content.[0].description").value(itemDto.getDescription()))
+                .andExpect(jsonPath("$.content.[0].available").value(itemDto.getAvailable()))
+                .andExpect(jsonPath("$.content.[0].name").value(itemDto.getName()))
+                .andExpect(jsonPath("$.content.[0].requestId").isEmpty())
+                .andExpect(jsonPath("$.content.[0].lastBooking").isEmpty())
+                .andExpect(jsonPath("$.content.[0].nextBooking").isEmpty())
+                .andExpect(jsonPath("$.content.[0].comments").isEmpty());
         verify(itemService).searchItems(anyString(), anyInt(), anyInt());
     }
 

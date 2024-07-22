@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.booking.controller.BookingController;
@@ -18,20 +19,30 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.util.PageUtil;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.constant.HeaderConstant.USER_ID_IN_HEADER;
 
 @WebMvcTest(BookingController.class)
 class BookingControllerTest {
-    private static final String USER_ID_IN_HEADER = "X-Sharer-User-Id";
+
     @Autowired
     MockMvc mvc;
     @Autowired
@@ -141,35 +152,40 @@ class BookingControllerTest {
     @Test
     void getBookingsOfUserIsOk() throws Exception {
         when(bookingService.getBookingsOfBooker(any(), anyLong(), anyInt(), anyInt()))
-                .thenReturn(List.of(BookingMapper.toOutputBookingDto(booking)));
+                .thenReturn(
+                        new PageImpl<>(List.of(BookingMapper.toOutputBookingDto(booking)),
+                                PageUtil.getPageRequest(0, 10), 1)
+                );
         mvc.perform(get("/bookings")
                         .header(USER_ID_IN_HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[*]").exists())
-                .andExpect(jsonPath("$.[*]").isNotEmpty())
-                .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$.[0].id").value(booking.getId()))
-                .andExpect(jsonPath("$.[0].start").isNotEmpty())
-                .andExpect(jsonPath("$.[0].end").isNotEmpty())
-                .andExpect(jsonPath("$.[0].status").value(booking.getStatus().toString()))
-                .andExpect(jsonPath("$.[0].booker.id").value(booking.getBooker().getId()))
-                .andExpect(jsonPath("$.[0].booker.name").value(booking.getBooker().getName()))
-                .andExpect(jsonPath("$.[0].item.id").value(booking.getItem().getId()))
-                .andExpect(jsonPath("$.[0].item.name").value(booking.getItem().getName()));
+                .andExpect(jsonPath("$.content.[*]").exists())
+                .andExpect(jsonPath("$.content.[*]").isNotEmpty())
+                .andExpect(jsonPath("$.content.size()").value(1))
+                .andExpect(jsonPath("$.content.[0].id").value(booking.getId()))
+                .andExpect(jsonPath("$.content.[0].start").isNotEmpty())
+                .andExpect(jsonPath("$.content.[0].end").isNotEmpty())
+                .andExpect(jsonPath("$.content.[0].status").value(booking.getStatus().toString()))
+                .andExpect(jsonPath("$.content.[0].booker.id").value(booking.getBooker().getId()))
+                .andExpect(jsonPath("$.content.[0].booker.name").value(booking.getBooker().getName()))
+                .andExpect(jsonPath("$.content.[0].item.id").value(booking.getItem().getId()))
+                .andExpect(jsonPath("$.content.[0].item.name").value(booking.getItem().getName()));
 
         verify(bookingService).getBookingsOfBooker(any(), anyLong(), anyInt(), anyInt());
     }
 
     @Test
     void getBookingsOfBookerWithoutBooking() throws Exception {
-        when(bookingService.getBookingsOfBooker(any(), anyLong(), anyInt(), anyInt())).thenReturn(List.of());
+        when(bookingService.getBookingsOfBooker(any(), anyLong(), anyInt(), anyInt())).thenReturn(
+                new PageImpl<>(Collections.emptyList(), PageUtil.getPageRequest(0, 10), 0)
+        );
         mvc.perform(get("/bookings")
                         .header(USER_ID_IN_HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[*]").isEmpty());
+                .andExpect(jsonPath("$.content.[*]").isEmpty());
         verify(bookingService).getBookingsOfBooker(any(), anyLong(), anyInt(), anyInt());
     }
 
@@ -196,22 +212,25 @@ class BookingControllerTest {
     @Test
     void getBookingsOfOwnerIsOk() throws Exception {
         when(bookingService.getBookingsOfOwner(any(), anyLong(), anyInt(), anyInt()))
-                .thenReturn(List.of(BookingMapper.toOutputBookingDto(booking)));
+                .thenReturn(
+                        new PageImpl<>(List.of(BookingMapper.toOutputBookingDto(booking)),
+                                PageUtil.getPageRequest(0, 10), 1)
+                );
         mvc.perform(get("/bookings/owner")
                         .header(USER_ID_IN_HEADER, 1L)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[*]").exists())
-                .andExpect(jsonPath("$.[*]").isNotEmpty())
-                .andExpect(jsonPath("$.size()").value(1))
-                .andExpect(jsonPath("$.[0].id").value(booking.getId()))
-                .andExpect(jsonPath("$.[0].start").isNotEmpty())
-                .andExpect(jsonPath("$.[0].end").isNotEmpty())
-                .andExpect(jsonPath("$.[0].status").value(booking.getStatus().toString()))
-                .andExpect(jsonPath("$.[0].booker.id").value(booking.getBooker().getId()))
-                .andExpect(jsonPath("$.[0].booker.name").value(booking.getBooker().getName()))
-                .andExpect(jsonPath("$.[0].item.id").value(booking.getItem().getId()))
-                .andExpect(jsonPath("$.[0].item.name").value(booking.getItem().getName()));
+                .andExpect(jsonPath("$.content.[*]").exists())
+                .andExpect(jsonPath("$.content.[*]").isNotEmpty())
+                .andExpect(jsonPath("$.content.size()").value(1))
+                .andExpect(jsonPath("$.content.[0].id").value(booking.getId()))
+                .andExpect(jsonPath("$.content.[0].start").isNotEmpty())
+                .andExpect(jsonPath("$.content.[0].end").isNotEmpty())
+                .andExpect(jsonPath("$.content.[0].status").value(booking.getStatus().toString()))
+                .andExpect(jsonPath("$.content.[0].booker.id").value(booking.getBooker().getId()))
+                .andExpect(jsonPath("$.content.[0].booker.name").value(booking.getBooker().getName()))
+                .andExpect(jsonPath("$.content.[0].item.id").value(booking.getItem().getId()))
+                .andExpect(jsonPath("$.content.[0].item.name").value(booking.getItem().getName()));
         verify(bookingService).getBookingsOfOwner(any(), anyLong(), anyInt(), anyInt());
     }
 

@@ -1,8 +1,10 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.InputBookingDto;
@@ -21,7 +23,12 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -129,59 +136,65 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     @Override
-    public List<OutputBookingDto> getBookingsOfBooker(String stateText, Long bookerId, int from, int size) {
+    @SuppressWarnings("unchecked")
+    public Page<OutputBookingDto> getBookingsOfBooker(String stateText, Long bookerId, int from, int size) {
         getUserById(bookerId);
         State state = State.getState(stateText);
         Pageable pageable = PageRequest.of(size == 0 ? 0 : from / size, size, BookingRepository.SORT_BY_START_BY_DESC);
-        List<Booking> bookings;
-        switch (state) {
-            case WAITING:
-                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, BookingStatus.WAITING);
-                break;
-            case REJECTED:
-                bookings = bookingRepository.findAllByBookerIdAndStatus(bookerId, BookingStatus.REJECTED);
-                break;
-            case PAST:
-                bookings = bookingRepository.findAllByBookerIdAndEndBefore(bookerId, LocalDateTime.now());
-                break;
-            case FUTURE:
-                bookings = bookingRepository.findAllByBookerIdAndStartAfter(bookerId, LocalDateTime.now());
-                break;
-            case CURRENT:
-                bookings = bookingRepository.findAllByBookerIdAndStartBeforeAndEndAfter(bookerId, LocalDateTime.now());
-                break;
-            default:
-                bookings = bookingRepository.findAllByBookerId(bookerId);
-        }
-        return BookingMapper.toOutputsBookingDtoList(bookings);
+        Specification<Booking> spec = (root, query, cb) -> {
+            Join<Object, Object> bookerJoin = (Join<Object, Object>) root.fetch("booker");
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(bookerJoin.get("id"), bookerId));
+            predicates.addAll(getPredicates(root, cb, state));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return bookingRepository.findAll(spec, pageable).map(BookingMapper::toOutputBookingDto);
     }
 
     @Transactional
     @Override
-    public List<OutputBookingDto> getBookingsOfOwner(String stateText, Long ownerId, int from, int size) {
+    @SuppressWarnings("unchecked")
+    public Page<OutputBookingDto> getBookingsOfOwner(String stateText, Long ownerId, int from, int size) {
         getUserById(ownerId);
+
         State state = State.getState(stateText);
         Pageable pageable = PageRequest.of(size == 0 ? 0 : from / size, size, BookingRepository.SORT_BY_START_BY_DESC);
-        List<Booking> bookings;
+        Specification<Booking> spec = (root, query, cb) -> {
+            Join<Object, Object> itemJoin = (Join<Object, Object>) root.fetch("item");
+            Join<Object, Object> ownerJoin = (Join<Object, Object>) itemJoin.fetch("owner");
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(ownerJoin.get("id"), ownerJoin));
+            predicates.addAll(getPredicates(root, cb, state));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return bookingRepository.findAll(spec, pageable).map(BookingMapper::toOutputBookingDto);
+    }
+
+    private List<Predicate> getPredicates(Root<Booking> root, CriteriaBuilder cb, State state) {
+        List<Predicate> predicates = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+
         switch (state) {
             case WAITING:
-                bookings = bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.WAITING);
+                predicates.add(cb.equal(root.get("status"), BookingStatus.WAITING));
                 break;
             case REJECTED:
-                bookings = bookingRepository.findAllByOwnerIdAndStatus(ownerId, BookingStatus.REJECTED);
+                predicates.add(cb.equal(root.get("status"), BookingStatus.REJECTED));
                 break;
             case PAST:
-                bookings = bookingRepository.findAllByOwnerIdAndEndBefore(ownerId, LocalDateTime.now());
+                predicates.add(cb.lessThan(root.get("end"), now));
                 break;
             case FUTURE:
-                bookings = bookingRepository.findAllByOwnerIdAndStartAfter(ownerId, LocalDateTime.now());
+                predicates.add(cb.greaterThan(root.get("start"), now));
                 break;
             case CURRENT:
-                bookings = bookingRepository.findAllByOwnerIdAndStartBeforeAndEndAfter(ownerId, LocalDateTime.now());
+                predicates.add(cb.lessThan(root.get("start"), now));
+                predicates.add(cb.greaterThan(root.get("end"), now));
                 break;
-            default:
-                bookings = bookingRepository.findAllByOwnerId(ownerId);
         }
-        return BookingMapper.toOutputsBookingDtoList(bookings);
+
+        return predicates;
     }
 }

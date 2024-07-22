@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.controller;
 import com.sun.istack.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,8 +22,9 @@ import ru.practicum.shareit.item.service.ItemService;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
-import java.util.List;
 import java.util.Map;
+
+import static ru.practicum.shareit.constant.HeaderConstant.USER_ID_IN_HEADER;
 
 @Slf4j
 @RestController
@@ -30,11 +32,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Validated
 public class ItemController {
-    private static final String USER_ID_IN_HEADER = "X-Sharer-User-Id";
+
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto create(@RequestHeader(USER_ID_IN_HEADER) long ownerId, @Valid @RequestBody @NotNull ItemDto itemDto) {
+    public ItemDto create(@RequestHeader(USER_ID_IN_HEADER) long ownerId,
+                          @Valid @RequestBody @NotNull ItemDto itemDto) {
 
         return itemService.add(ownerId, itemDto);
     }
@@ -51,7 +54,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getAllUserItems(@RequestHeader(USER_ID_IN_HEADER) long ownerId,
+    public Page<ItemDto> getAllUserItems(@RequestHeader(USER_ID_IN_HEADER) long ownerId,
                                          @Valid @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                          @Valid @RequestParam(defaultValue = "10") @Positive int size) {
 
@@ -59,13 +62,10 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchItems(@RequestHeader(USER_ID_IN_HEADER) long userId,
+    public Page<ItemDto> searchItems(@RequestHeader(USER_ID_IN_HEADER) long userId,
                                      @RequestParam(name = "text") String text,
                                      @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                      @RequestParam(defaultValue = "10") @Positive int size) {
-        if ((text == null) || (text.isBlank())) {
-            return List.of();
-        }
         return itemService.searchItems(text, from, size);
     }
 

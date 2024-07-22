@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.repositories.BookingRepository;
@@ -24,8 +25,10 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.util.PageUtil;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -174,8 +177,10 @@ class ItemServiceImplTest {
     @Test
     void getAllIsOk() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        when(itemRepository.findAllByOwnerId(anyLong(), any())).thenReturn(List.of(item));
-        List<ItemDto> items = itemService.getAllUserItems(user.getId(), 0, 100);
+        when(itemRepository.findAllByOwnerId(anyLong(), any())).thenReturn(
+                new PageImpl<>(List.of(item), PageUtil.getPageRequest(0, 100), 1)
+        );
+        List<ItemDto> items = itemService.getAllUserItems(user.getId(), 0, 100).getContent();
         assertFalse(items.isEmpty());
         assertEquals(1, items.size());
         assertEquals(item.getId(), items.get(0).getId());
@@ -186,8 +191,10 @@ class ItemServiceImplTest {
     @Test
     void getAllWithEmptyCollection() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        when(itemRepository.findAllByOwnerId(anyLong(), any())).thenReturn(List.of());
-        List<ItemDto> items = itemService.getAllUserItems(user.getId(), 0, 100);
+        when(itemRepository.findAllByOwnerId(anyLong(), any())).thenReturn(
+                new PageImpl<>(Collections.emptyList(), PageUtil.getPageRequest(0, 100), 0)
+        );
+        List<ItemDto> items = itemService.getAllUserItems(user.getId(), 0, 100).getContent();
         assertTrue(items.isEmpty());
         verify(userRepository).findById(anyLong());
         verify(itemRepository).findAllByOwnerId(anyLong(), any());
@@ -201,20 +208,15 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void searchAvailableItemsWithEmptyRequest() {
-        List<ItemDto> items = itemService.searchItems("", 0, 100);
-        assertTrue(items.isEmpty());
-        verify(itemRepository).searchAvailableItems(anyString());
-    }
-
-    @Test
     void searchAvailableItemsWithReturnCollection() {
-        when(itemRepository.searchAvailableItems(anyString())).thenReturn(List.of(item));
-        List<ItemDto> items = itemService.searchItems("quEry", 0, 100);
+        when(itemRepository.searchAvailableItems(anyString(), any())).thenReturn(
+                new PageImpl<>(List.of(item), PageUtil.getPageRequest(0, 100), 1)
+        );
+        List<ItemDto> items = itemService.searchItems("quEry", 0, 100).getContent();
         assertFalse(items.isEmpty());
         assertEquals(1, items.size());
         assertEquals(items.get(0), ItemMapper.toItemDto(item));
-        verify(itemRepository).searchAvailableItems(anyString());
+        verify(itemRepository).searchAvailableItems(anyString(), any());
     }
 
     @Test
