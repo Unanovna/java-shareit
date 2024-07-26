@@ -24,8 +24,7 @@ public class ItemDto {
     private Boolean available;
     @JsonIgnore
     private User owner;
-    @JsonIgnore
-    private Long request;
+    private Long requestId;
     private ShortBookingDto lastBooking;
     private ShortBookingDto nextBooking;
     private List<CommentDto> comments;

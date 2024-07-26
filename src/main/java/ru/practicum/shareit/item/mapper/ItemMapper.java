@@ -12,18 +12,19 @@ public class ItemMapper {
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
-                .available(item.isAvailable())
+                .available(item.getAvailable())
+                .requestId(item.getRequest() == null ? null : item.getRequest().getId())
                 .build();
     }
 
     public static Item toItem(ItemDto item) {
+
         return Item.builder()
                 .id(item.getId())
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
                 .owner(item.getOwner())
-                .requestId(item.getRequest())
                 .build();
     }
 

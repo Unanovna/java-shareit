@@ -1,60 +1,39 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Getter
 @Setter
-@ToString
+@Entity
+@Table(name = "items")
+@Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "items")
 public class Item {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank
-    @Column
+    @Column(nullable = false)
     private String name;
-
-    @NotBlank
-    @Column
+    @Column(nullable = false, length = 1000)
     private String description;
-
-    @NotNull
-    @Column(name = "is_available")
-    private boolean available;
-
-    @NotNull
+    @Column(name = "is_available", nullable = false)
+    private Boolean available;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @ToString.Exclude
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
-
-    private Long requestId;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @JoinColumn(name = "request_id")
+    private ItemRequest request;
 
     @Override
     public final boolean equals(Object o) {
@@ -71,4 +50,5 @@ public class Item {
     public final int hashCode() {
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
+
 }
