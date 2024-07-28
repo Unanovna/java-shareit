@@ -5,11 +5,17 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.example.booking.dto.BookingPostRequestDto;
-import org.example.exception.StateException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping(path = "/bookings")
@@ -46,9 +52,7 @@ public class BookingController {
                                                       int from,
                                                       @RequestParam(name = "size", defaultValue = "10") @Positive
                                                       int size) {
-        State state = State.from(stateParam)
-                .orElseThrow(() -> new StateException("Unknown state: " + stateParam));
-        return bookingClient.getBookingsOfBooker(bookerId, state, from, size);
+        return bookingClient.getBookingsOfBooker(bookerId, stateParam, from, size);
     }
 
     @GetMapping("/owner")
@@ -59,8 +63,6 @@ public class BookingController {
                                                      int from,
                                                      @Positive @RequestParam(name = "size", defaultValue = "10")
                                                      int size) {
-        State state = State.from(stateParam)
-                .orElseThrow(() -> new StateException("Unknown state: " + stateParam));
-        return bookingClient.getBookingsOfOwner(ownerId, state, from, size);
+        return bookingClient.getBookingsOfOwner(ownerId, stateParam, from, size);
     }
 }
