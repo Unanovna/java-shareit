@@ -7,6 +7,6 @@ import org.springframework.data.domain.Sort;
 public class PageUtil {
 
     public static Pageable getPageRequest(int from, int size) {
-        return PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "created"));
+        return PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "id"));
     }
 }
