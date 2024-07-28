@@ -9,7 +9,6 @@ import org.example.item.dto.CommentDto;
 import org.example.item.dto.ItemDto;
 import org.example.item.service.ItemService;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,11 +61,11 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Page<ItemDto> searchItems(@RequestHeader(USER_ID_IN_HEADER) long userId,
+    public List<ItemDto> searchItems(@RequestHeader(USER_ID_IN_HEADER) long userId,
                                      @RequestParam(name = "text") String text,
                                      @RequestParam(defaultValue = "0") @PositiveOrZero int from,
                                      @RequestParam(defaultValue = "10") @Positive int size) {
-        return itemService.searchItems(text, from, size);
+        return itemService.searchItems(text, from, size).getContent();
     }
 
     @DeleteMapping("/{itemId}")
