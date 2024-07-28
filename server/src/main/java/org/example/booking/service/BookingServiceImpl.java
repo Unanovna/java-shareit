@@ -100,13 +100,13 @@ public class BookingServiceImpl implements BookingService {
             throw new ValidationException(String.format("Booking with id: %d already have status %s",
                     bookingId, BookingStatus.APPROVED));
         }
-        if (!userId.equals(getItemOwnerId(booking))) {
-            throw new InternalServerError(String.format("Access to User id:%s for booking id:%s is denied",
-                    userId, booking.getId()));
-        }
         BookingStatus bookingStatus = isApprove ? BookingStatus.APPROVED : BookingStatus.REJECTED;
         if (booking.getBooker().getId().equals(userId) && bookingStatus == BookingStatus.APPROVED) {
             throw new NotFoundException("Owner cant approve");
+        }
+        if (!userId.equals(getItemOwnerId(booking))) {
+            throw new InternalServerError(String.format("Access to User id:%s for booking id:%s is denied",
+                    userId, booking.getId()));
         }
         booking.setStatus(bookingStatus);
         return BookingMapper.toOutputBookingDto(bookingRepository.save(booking));
