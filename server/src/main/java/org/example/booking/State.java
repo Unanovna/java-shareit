@@ -5,17 +5,11 @@ import org.example.exception.ArgumentException;
 import java.util.Optional;
 
 public enum State {
-    // Все
     ALL,
-    // Текущие
     CURRENT,
-    // Будущие
     FUTURE,
-    // Завершенные
     PAST,
-    // Отклоненные
     REJECTED,
-    // Ожидающие подтверждения
     WAITING;
 
     public static Optional<State> from(String stringState) {
