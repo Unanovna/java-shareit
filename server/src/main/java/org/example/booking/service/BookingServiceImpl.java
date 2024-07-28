@@ -45,6 +45,11 @@ public class BookingServiceImpl implements BookingService {
         return booking;
     }
 
+    private User getUserByIdInternal(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new InternalServerError(String.format("User with id %d not found", userId)));
+    }
+
     private User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("User with id %d not found", userId)));
@@ -89,7 +94,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public OutputBookingDto approveBooking(Long bookingId, Long userId, Boolean isApprove) {
-        getUserById(userId);
+        getUserByIdInternal(userId);
         Booking booking = getBookingById(bookingId, userId);
         if (booking.getStatus().equals(BookingStatus.APPROVED)) {
             throw new ValidationException(String.format("Booking with id: %d already have status %s",

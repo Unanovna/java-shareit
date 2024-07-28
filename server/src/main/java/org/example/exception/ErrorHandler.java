@@ -31,7 +31,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(final NotFoundException e) {
         String strError = String.format("Required object wasn't found: %s", e.getMessage());
         log.info(strError);
