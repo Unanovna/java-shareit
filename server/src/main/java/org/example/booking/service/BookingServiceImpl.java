@@ -12,7 +12,6 @@ import org.example.booking.mapper.BookingMapper;
 import org.example.booking.model.Booking;
 import org.example.booking.model.BookingStatus;
 import org.example.booking.repository.BookingRepository;
-import org.example.booking.service.BookingService;
 import org.example.exception.AccessException;
 import org.example.exception.InternalServerError;
 import org.example.exception.NotFoundException;
@@ -27,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -139,7 +139,7 @@ public class BookingServiceImpl implements BookingService {
     @SuppressWarnings("unchecked")
     public Page<OutputBookingDto> getBookingsOfBooker(String stateText, Long bookerId, int from, int size) {
         getUserById(bookerId);
-        State state = State.valueOf(stateText);
+        State state = State.getState(stateText);
         Pageable pageable = PageRequest.of(size == 0 ? 0 : from / size, size, BookingRepository.SORT_BY_START_BY_DESC);
         Specification<Booking> spec = (root, query, cb) -> {
             Join<Object, Object> bookerJoin = (Join<Object, Object>) root.fetch("booker");
@@ -158,13 +158,13 @@ public class BookingServiceImpl implements BookingService {
     public Page<OutputBookingDto> getBookingsOfOwner(String stateText, Long ownerId, int from, int size) {
         getUserById(ownerId);
 
-        State state = State.valueOf(stateText);
+        State state = State.getState(stateText);
         Pageable pageable = PageRequest.of(size == 0 ? 0 : from / size, size, BookingRepository.SORT_BY_START_BY_DESC);
         Specification<Booking> spec = (root, query, cb) -> {
             Join<Object, Object> itemJoin = (Join<Object, Object>) root.fetch("item");
             Join<Object, Object> ownerJoin = (Join<Object, Object>) itemJoin.fetch("owner");
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(ownerJoin.get("id"), ownerJoin));
+            predicates.add(cb.equal(ownerJoin.get("id"), ownerId));
             predicates.addAll(getPredicates(root, cb, state));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
