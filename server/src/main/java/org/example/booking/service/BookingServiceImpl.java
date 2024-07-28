@@ -105,6 +105,9 @@ public class BookingServiceImpl implements BookingService {
                     userId, booking.getId()));
         }
         BookingStatus bookingStatus = isApprove ? BookingStatus.APPROVED : BookingStatus.REJECTED;
+        if (bookingStatus == BookingStatus.APPROVED) {
+            throw new NotFoundException("Owner cant approve");
+        }
         booking.setStatus(bookingStatus);
         return BookingMapper.toOutputBookingDto(bookingRepository.save(booking));
     }
