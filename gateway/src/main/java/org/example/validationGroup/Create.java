@@ -1,4 +1,4 @@
 package org.example.validationGroup;
 
-public class Create {
+public interface Create {
 }

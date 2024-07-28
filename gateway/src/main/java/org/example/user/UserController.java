@@ -15,7 +15,6 @@ import org.example.validationGroup.Create;
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-@Validated
 @RequestMapping(path = "/users")
 public class UserController {
     private final UserClient userClient;
