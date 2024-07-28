@@ -6,7 +6,6 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.example.request.ItemRequestDto;
 import org.example.request.service.ItemRequestService;
-import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,10 +42,10 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public Page<ItemRequestDto> getOtherUsersRequests(@RequestHeader(USER_ID_IN_HEADER) Long userId,
+    public List<ItemRequestDto> getOtherUsersRequests(@RequestHeader(USER_ID_IN_HEADER) Long userId,
                                                       @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                                       @RequestParam(defaultValue = "10") @Positive Integer size) {
-        return itemRequestService.getOtherUserRequests(userId, from, size);
+        return itemRequestService.getOtherUserRequests(userId, from, size).getContent();
     }
 
     @GetMapping("/{requestId}")

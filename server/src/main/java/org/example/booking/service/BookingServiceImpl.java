@@ -71,7 +71,7 @@ public class BookingServiceImpl implements BookingService {
             throw new AccessException(String.format("Item with id = %d not have owner.", itemId));
         }
         if (owner.getId().equals(userId)) {
-            throw new AccessException(String.format("Booker cannot be owner of item id: %d", userId));
+            throw new NotFoundException(String.format("Booker cannot be owner of item id: %d", userId));
         }
         LocalDateTime start = bookingDto.getStart();
         LocalDateTime end = bookingDto.getEnd();
@@ -101,7 +101,7 @@ public class BookingServiceImpl implements BookingService {
                     bookingId, BookingStatus.APPROVED));
         }
         if (!userId.equals(getItemOwnerId(booking))) {
-            throw new AccessException(String.format("Access to User id:%s for booking id:%s is denied",
+            throw new NotFoundException(String.format("Access to User id:%s for booking id:%s is denied",
                     userId, booking.getId()));
         }
         BookingStatus bookingStatus = isApprove ? BookingStatus.APPROVED : BookingStatus.REJECTED;
@@ -133,7 +133,7 @@ public class BookingServiceImpl implements BookingService {
         Long itemOwnerId = getItemOwnerId(booking);
         Long bookerId = booking.getBooker().getId();
         if (!((bookerId.equals(userId)) || (itemOwnerId.equals(userId)))) {
-            throw new AccessException(String.format("Access to User id:%s for booking id:%s is denied",
+            throw new NotFoundException(String.format("Access to User id:%s for booking id:%s is denied",
                     userId, booking.getId()));
         }
         return BookingMapper.toOutputBookingDto(booking);
