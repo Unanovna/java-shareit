@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.item.dto.CommentDto;
 import org.example.item.dto.ItemDto;
-import org.example.item.dto.ItemResponseDto;
 import org.example.item.service.ItemService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -54,13 +54,11 @@ public class ItemController {
     }
 
     @GetMapping
-    public ItemResponseDto getAllUserItems(@RequestHeader(USER_ID_IN_HEADER) long ownerId,
-                                           @Valid @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                           @Valid @RequestParam(defaultValue = "10") @Positive int size) {
+    public List<ItemDto> getAllUserItems(@RequestHeader(USER_ID_IN_HEADER) long ownerId,
+                                         @Valid @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                         @Valid @RequestParam(defaultValue = "10") @Positive int size) {
 
-        return ItemResponseDto.builder()
-                .item(itemService.getAllUserItems(ownerId, from, size).getContent())
-                .build();
+        return itemService.getAllUserItems(ownerId, from, size).getContent();
     }
 
     @GetMapping("/search")
