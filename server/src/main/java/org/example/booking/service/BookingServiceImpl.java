@@ -101,7 +101,7 @@ public class BookingServiceImpl implements BookingService {
                     bookingId, BookingStatus.APPROVED));
         }
         if (!userId.equals(getItemOwnerId(booking))) {
-            throw new NotFoundException(String.format("Access to User id:%s for booking id:%s is denied",
+            throw new InternalServerError(String.format("Access to User id:%s for booking id:%s is denied",
                     userId, booking.getId()));
         }
         BookingStatus bookingStatus = isApprove ? BookingStatus.APPROVED : BookingStatus.REJECTED;
@@ -147,7 +147,7 @@ public class BookingServiceImpl implements BookingService {
         State state = State.getState(stateText);
         Pageable pageable = PageRequest.of(size == 0 ? 0 : from / size, size, BookingRepository.SORT_BY_START_BY_DESC);
         Specification<Booking> spec = (root, query, cb) -> {
-            Join<Object, Object> bookerJoin = (Join<Object, Object>) root.fetch("booker");
+            Join<Object, Object> bookerJoin = root.join("booker");
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(bookerJoin.get("id"), bookerId));
             predicates.addAll(getPredicates(root, cb, state));
@@ -166,8 +166,8 @@ public class BookingServiceImpl implements BookingService {
         State state = State.getState(stateText);
         Pageable pageable = PageRequest.of(size == 0 ? 0 : from / size, size, BookingRepository.SORT_BY_START_BY_DESC);
         Specification<Booking> spec = (root, query, cb) -> {
-            Join<Object, Object> itemJoin = (Join<Object, Object>) root.fetch("item");
-            Join<Object, Object> ownerJoin = (Join<Object, Object>) itemJoin.fetch("owner");
+            Join<Object, Object> itemJoin = root.join("item");
+            Join<Object, Object> ownerJoin = itemJoin.join("owner");
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(ownerJoin.get("id"), ownerId));
             predicates.addAll(getPredicates(root, cb, state));
