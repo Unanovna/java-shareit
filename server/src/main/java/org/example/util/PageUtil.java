@@ -1,4 +1,4 @@
-package org.example;
+package org.example.util;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

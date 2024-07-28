@@ -3,7 +3,7 @@ package org.example.item.service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.PageUtil;
+import org.example.util.PageUtil;
 import org.example.booking.mapper.BookingMapper;
 import org.example.booking.model.Booking;
 import org.example.booking.model.BookingStatus;

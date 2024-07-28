@@ -23,7 +23,7 @@ public class UserController {
 
     @PutMapping
     public UserDto updateUser(@Valid @RequestBody @NotNull UserDto user) {
-        return userService.update(user.getId(), UserMapper.toUser(user));
+        return userService.update(user.getId(), user);
     }
 
     @GetMapping("{id}")

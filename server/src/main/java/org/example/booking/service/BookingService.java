@@ -5,6 +5,7 @@ import org.example.booking.OutputBookingDto;
 import org.example.booking.model.Booking;
 import org.springframework.data.domain.Page;
 
+
 public interface BookingService {
 
     OutputBookingDto create(InputBookingDto bookingDto, Long userId);
