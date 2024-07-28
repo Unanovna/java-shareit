@@ -3,7 +3,6 @@ package org.example.item.service;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.util.PageUtil;
 import org.example.booking.mapper.BookingMapper;
 import org.example.booking.model.Booking;
 import org.example.booking.model.BookingStatus;
@@ -21,6 +20,7 @@ import org.example.item.reposiory.ItemRepository;
 import org.example.request.repository.ItemRequestRepository;
 import org.example.user.model.User;
 import org.example.user.repository.UserRepository;
+import org.example.util.PageUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -70,19 +70,20 @@ public class ItemServiceImpl implements ItemService {
         getUserById(ownerId);
         Item item = getItemById(itemId);
         checkOwnerOfItem(ownerId, item);
-        if (updates.containsKey("name")) {
-            String value = updates.get("name");
-            checkString(value, "Name");
+        String name = updates.get("name");
+        if (name != null) {
+            checkString(name, "Name");
             log.info("Change name item {} owner {}", itemId, ownerId);
-            item.setName(value);
+            item.setName(name);
         }
-        if (updates.containsKey("description")) {
-            String value = updates.get("description");
-            checkString(value, "Name");
-            item.setDescription(value);
+        String description = updates.get("description");
+        if (description != null) {
+            checkString(description, "Name");
+            item.setDescription(description);
         }
-        if (updates.containsKey("available")) {
-            item.setAvailable(Boolean.valueOf(updates.get("available")));
+        String available = updates.get("available");
+        if (available != null) {
+            item.setAvailable(Boolean.valueOf(available));
         }
         return ItemMapper.toItemDto(itemRepository.save(item));
     }
